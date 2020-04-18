@@ -1,0 +1,6 @@
+/* line 3, src/scss/styles.scss */
+body {
+  background: rgba(148, 134, 134, 0.66);
+  color: #1a1616;
+  display: flex;
+}
