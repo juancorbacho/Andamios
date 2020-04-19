@@ -1,12 +1,14 @@
 import gulp from "gulp"
 import browserSync from "browser-sync"
 import babel from "gulp-babel"
+import cachebust from 'gulp-cache-bust'
 import concat from "gulp-concat"
 import imagemin from "gulp-imagemin"
 import plumber from "gulp-plumber"
 import pug from "gulp-pug"
 import sass from "gulp-sass"
 import sitemap from "gulp-sitemap"
+import sourcemaps from "gulp-sourcemaps"
 import uglify from "gulp-uglify"
 
 import postcss from "gulp-postcss"
@@ -64,8 +66,10 @@ gulp.task('serve', function() {
 
 gulp.task('stylesDev', ()=>{
     return gulp.src('./src/scss/styles.scss')
+        .pipe(sourcemaps.init({ loadMaps : true}))
         .pipe(plumber())
         .pipe(sass(sassOptionsDev))
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./public/css'))
         .pipe(serve.stream())
 })
@@ -84,7 +88,7 @@ gulp.task('pug', ()=>{
     return gulp.src('./src/pug/*.pug')
         .pipe(plumber())
         .pipe(pug({
-            pretty: true
+            basedir: './src/pug'
         }))
         .pipe(gulp.dest('./public/'))
 })
@@ -106,7 +110,7 @@ gulp.task('imagesDev', ()=>{
 });
 
 gulp.task('imagesProd', ()=>{
-    return gulp.src('src/images/*')
+    return gulp.src('./src/images/*')
         .pipe(imagemin())
         .pipe(gulp.dest('./public/images'))
 });
@@ -121,6 +125,14 @@ gulp.task('sitemap', ()=>{
         .pipe(gulp.dest('./public'));
 });
 
+gulp.task('cache', ()=>{
+    return gulp.src('./public/**/*.html')
+      .pipe(cachebust({
+        type: 'timestamp'
+      }))
+      .pipe(gulp.dest('./public'))
+  })
+
 gulp.task("dev", gulp.parallel("serve", gulp.series([
         "stylesDev",
         "pug",
@@ -129,11 +141,12 @@ gulp.task("dev", gulp.parallel("serve", gulp.series([
       ])
 ));
 
-gulp.task("prod",gulp.series([
+gulp.task("prod", gulp.parallel([
         "stylesProd",
         "pug",
         "babel",
         "imagesProd",
+        "cache",
         "sitemap"
       ])
 );
