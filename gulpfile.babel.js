@@ -2,6 +2,7 @@ import gulp from "gulp"
 import browserSync from "browser-sync"
 import babel from "gulp-babel"
 import concat from "gulp-concat"
+import imagemin from "gulp-imagemin"
 import plumber from "gulp-plumber"
 import pug from "gulp-pug"
 import sass from "gulp-sass"
@@ -98,18 +99,30 @@ gulp.task('babel', ()=>{
         .pipe(gulp.dest('./public/js/'))
 })
 
-gulp.task("dev",gulp.series([
+gulp.task('imagesDev', ()=>{
+    return gulp.src('./src/images/*')
+        .pipe(gulp.dest('./public/images'))
+});
+
+gulp.task('imagesProd', ()=>{
+    return gulp.src('src/images/*')
+        .pipe(imagemin())
+        .pipe(gulp.dest('./public/images'))
+});
+
+gulp.task("dev", gulp.parallel("serve", gulp.series([
         "stylesDev",
         "pug",
         "babel",
-        "serve"
+        "imagesDev"
       ])
-);
+));
 
 gulp.task("prod",gulp.series([
         "stylesProd",
         "pug",
-        "babel"
+        "babel",
+        "imagesProd"
       ])
 );
 
