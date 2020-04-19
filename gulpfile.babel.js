@@ -6,6 +6,7 @@ import imagemin from "gulp-imagemin"
 import plumber from "gulp-plumber"
 import pug from "gulp-pug"
 import sass from "gulp-sass"
+import sitemap from "gulp-sitemap"
 import uglify from "gulp-uglify"
 
 import postcss from "gulp-postcss"
@@ -110,6 +111,16 @@ gulp.task('imagesProd', ()=>{
         .pipe(gulp.dest('./public/images'))
 });
 
+gulp.task('sitemap', ()=>{
+    return gulp.src('./public/**/*.html', {
+            read: false
+        })
+        .pipe(sitemap({
+            siteUrl: 'http://www.example.com'
+        }))
+        .pipe(gulp.dest('./public'));
+});
+
 gulp.task("dev", gulp.parallel("serve", gulp.series([
         "stylesDev",
         "pug",
@@ -122,7 +133,8 @@ gulp.task("prod",gulp.series([
         "stylesProd",
         "pug",
         "babel",
-        "imagesProd"
+        "imagesProd",
+        "sitemap"
       ])
 );
 
