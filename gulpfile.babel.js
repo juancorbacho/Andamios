@@ -74,6 +74,8 @@ gulp.task('serve', function() {
     gulp.watch('src/pug/**/*.pug', gulp.series('pug')).on('change', reload);
 // Listen to change events on JS and reload
     gulp.watch('./src/js/*.js', gulp.series('scriptsDev')).on('change', reload);
+// Listen to change events on IMAGES and reload
+    gulp.watch("./src/img/**/**", gulp.series('imagesDev')).on("change", reload);
 });
 
 /**
@@ -163,7 +165,7 @@ gulp.task('scriptsProd', ()=>{
 
 gulp.task('imagesDev', ()=>{
     return gulp.src('./src/img/*')
-        .pipe(gulp.dest('./public/images'))
+        .pipe(gulp.dest('./public/img'))
 });
 
 gulp.task('imagesProd', ()=>{
