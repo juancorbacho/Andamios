@@ -1,8 +1,19 @@
-/* line 3, src/scss/styles.scss */
+/*
+  This boilerplate is based in ITCSS and SMACSS
+*/
+/* line 1, src/scss/base/base.scss */
+*,
+*::before,
+*:after {
+  box-sizing: border-box;
+}
+
+/* line 7, src/scss/base/base.scss */
 body {
-  background: rgba(148, 134, 134, 0.66);
-  color: #1a1616;
-  display: flex;
+  margin: 0;
+  font-family: "sans-serif";
+  background-color: #f2e8e8;
+  color: black;
 }
 
 /*# sourceMappingURL=styles.css.map */

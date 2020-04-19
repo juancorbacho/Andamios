@@ -1,0 +1,12 @@
+*,
+*::before,
+*:after {
+  box-sizing: border-box;
+}
+
+body {
+  margin : 0;
+  font-family : $font-family;
+  background-color: rgb(242, 232, 232);
+  color: rgb(0, 0, 0);
+}
