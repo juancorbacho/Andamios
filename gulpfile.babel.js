@@ -3,13 +3,16 @@ import browserSync from "browser-sync"
 import babel from "gulp-babel"
 import cachebust from 'gulp-cache-bust'
 import concat from "gulp-concat"
+import gzip from "gulp-gzip"
 import imagemin from "gulp-imagemin"
 import notify from "gulp-notify"
 import plumber from "gulp-plumber"
 import pug from "gulp-pug"
 import sass from "gulp-sass"
+import sizereport from "gulp-sizereport"
 import sitemap from "gulp-sitemap"
 import sourcemaps from "gulp-sourcemaps"
+import tar from "gulp-tar"
 import uglify from "gulp-uglify"
 
 import postcss from "gulp-postcss"
@@ -17,6 +20,8 @@ import autoprefixer from "autoprefixer"
 import zIndex from "postcss-zindex"
 import pseudoelements from "postcss-pseudoelements"
 import nthChild from "postcss-nth-child-fix"
+
+import del from "del"
 
 const serve = browserSync.create()
 
@@ -202,6 +207,26 @@ gulp.task('cache', ()=>{
       .pipe(gulp.dest('./public'))
   });
 
+  gulp.task('compress', () =>
+  gulp.src('./public/**/**')
+    .pipe(tar('code.tar'))   // Pack all the files together
+    .pipe(gzip())            // Compress the package using gzip
+    .pipe(gulp.dest('.'))
+    .pipe(notify('Compressed package generated!'))
+);
+
+gulp.task('size', () =>
+  gulp.src('public/**/**')     // Select all the files recursively in dist
+    .pipe(sizereport({
+      gzip: true,         // Show the plain size and the compressed size
+    }))
+);
+
+// Task to delete target build folder
+gulp.task('clean', ()=>{
+    return del(['public/**', '!public']);
+  });
+
 gulp.task("dev", gulp.parallel("serve", gulp.series([
         "stylesDev",
         "pug",
@@ -210,13 +235,13 @@ gulp.task("dev", gulp.parallel("serve", gulp.series([
       ])
 ));
 
-gulp.task("prod", gulp.parallel([
-        "stylesProd",
-        "pug",
-        "scriptsProd",
-        "imagesProd",
-        "cache",
+gulp.task("prod", gulp.series(gulp.parallel([
+        "stylesProd", 
+        "pug", 
+        "scriptsProd", 
+        "imagesProd", 
+        "cache", 
         "sitemap"
-      ])
-);
-
+      ]), 
+        "compress"
+));
