@@ -1,5 +1,6 @@
 import gulp from "gulp"
 import browserSync from "browser-sync"
+import cssnano from "cssnano"
 import babel from "gulp-babel"
 import cachebust from 'gulp-cache-bust'
 import concat from "gulp-concat"
@@ -46,7 +47,8 @@ const postCssPlugins = [
     }),
     zIndex(),
     pseudoelements(),
-    nthChild()
+    nthChild(),
+    cssnano()
 ];
 
 function errorAlertJS(error) {
@@ -91,16 +93,17 @@ gulp.task('stylesDev', ()=>{
     return gulp.src('./src/scss/styles.scss')
         .pipe(sourcemaps.init({ loadMaps : true}))
         .pipe(plumber())
-        .pipe(sass(sassOptionsDev).on("error", sass.logError))
-        .pipe(sourcemaps.write('.'))
+        .pipe(sass(sassOptionsDev)
+        .on("error", sass.logError))                    
+        .pipe(sourcemaps.write('../maps'))              
         .pipe(gulp.dest('./public/css'))
-        .pipe(serve.stream({match: '**/*.css'}))
+        .pipe(serve.stream({match: '**/*.css'}))        
 });
 
 gulp.task('stylesProd', ()=>{
-    return gulp.src('./src/scss/styles.scss')
+    return gulp.src('./src/scss/styles.scss')           
         .pipe(plumber())
-        .pipe(sass(sassOptionsProd))
+        .pipe(sass(sassOptionsProd))                    
         .pipe(postcss(postCssPlugins))
         .pipe(concat("styles-min.css"))
         .pipe(gulp.dest('./public/css'))
@@ -129,20 +132,20 @@ gulp.task('pug', ()=>{
 */
 
 gulp.task('scriptsDev', ()=>{
-    return gulp.src('./src/js/*.js')
+    return gulp.src('./src/js/*.js')              
         .pipe(plumber())
         .pipe(babel({
             presets:['@babel/env']
-        }))
+        }))                                         
         .on('error', function (err) {
             console.error(err)
             this.emit('end')
           })
-        .pipe(concat('scripts-min.js'))
-        .pipe(uglify())
+        .pipe(concat('scripts-min.js'))            
+        .pipe(uglify())                             
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('./public/js/'))
+        .pipe(sourcemaps.write('../maps'))
+        .pipe(gulp.dest('./public/js/'))          
 });
 
 gulp.task('scriptsProd', ()=>{
@@ -227,7 +230,7 @@ gulp.task('clean', ()=>{
     return del(['public/**', '!public']);
   });
 
-gulp.task("dev", gulp.parallel("serve", gulp.series([
+gulp.task("default", gulp.parallel("serve", gulp.series([
         "stylesDev",
         "pug",
         "scriptsDev",
