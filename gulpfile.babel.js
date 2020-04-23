@@ -1,9 +1,10 @@
 import gulp from "gulp"
+import babelify from "babelify"
+import browserify from "browserify"
 import browserSync from "browser-sync"
 import cssnano from "cssnano"
 import babel from "gulp-babel"
 import cachebust from 'gulp-cache-bust'
-import concat from "gulp-concat"
 import gzip from "gulp-gzip"
 import imagemin from "gulp-imagemin"
 import notify from "gulp-notify"
@@ -15,7 +16,9 @@ import sitemap from "gulp-sitemap"
 import sourcemaps from "gulp-sourcemaps"
 import tar from "gulp-tar"
 import uglify from "gulp-uglify"
-
+import buffer from "vinyl-buffer"
+import source from "vinyl-source-stream"
+/* Imports postcss */
 import postcss from "gulp-postcss"
 import autoprefixer from "autoprefixer"
 import zIndex from "postcss-zindex"
@@ -105,7 +108,6 @@ gulp.task('stylesProd', ()=>{
         .pipe(plumber())
         .pipe(sass(sassOptionsProd))                    
         .pipe(postcss(postCssPlugins))
-        .pipe(concat("styles-min.css"))
         .pipe(gulp.dest('./public/css'))
         .pipe(
             notify({
@@ -132,16 +134,17 @@ gulp.task('pug', ()=>{
 */
 
 gulp.task('scriptsDev', ()=>{
-    return gulp.src('./src/js/*.js')              
-        .pipe(plumber())
-        .pipe(babel({
-            presets:['@babel/env']
-        }))                                         
+    return browserify('./src/js/index.js')              
+        .transform(babelify, {
+        global: true // permite importar desde afuera (como node_modules)
+         })
+        .bundle()                                      
         .on('error', function (err) {
             console.error(err)
             this.emit('end')
-          })
-        .pipe(concat('scripts-min.js'))            
+         })
+        .pipe(source('scripts-min.js'))
+        .pipe(buffer())           
         .pipe(uglify())                             
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(sourcemaps.write('../maps'))
@@ -149,16 +152,17 @@ gulp.task('scriptsDev', ()=>{
 });
 
 gulp.task('scriptsProd', ()=>{
-    return gulp.src('./src/js/*.js')
-        .pipe(plumber())
-        .pipe(babel({
-            presets:['@babel/env']
-        }))
+    return browserify('./src/js/index.js')
+        .transform(babelify, {
+        global: true // permite importar desde afuera (como node_modules)
+         })
+        .bundle()  
         .on("error", errorAlertJS)
-        .pipe(concat('scripts-min.js'))
+        .pipe(source('scripts-min.js'))
+        .pipe(buffer())
         .pipe(uglify())
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(sourcemaps.write('.'))
+        .pipe(sourcemaps.write('../maps'))
         .pipe(gulp.dest('./public/js/'))
         .pipe(
             notify({
@@ -232,13 +236,13 @@ gulp.task('clean', ()=>{
 
 gulp.task("default", gulp.parallel("serve", gulp.series([
         "stylesDev",
-        "pug",
+        "pug", 
         "scriptsDev",
-        "imagesDev"
+        "imagesDev",
       ])
 ));
 
-gulp.task("prod", gulp.series(gulp.parallel([
+gulp.task("build", gulp.series(gulp.parallel([
         "stylesProd", 
         "pug", 
         "scriptsProd", 

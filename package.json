@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "gulp",
-    "build": "gulp prod",
+    "build": "gulp build",
     "size": "gulp size",
     "clean": "gulp clean"
   },
@@ -17,13 +17,14 @@
     "@babel/preset-env": "^7.9.5",
     "@babel/register": "^7.9.0",
     "autoprefixer": "^9.7.6",
+    "babelify": "^10.0.0",
     "browser-sync": "^2.26.7",
+    "browserify": "^16.5.1",
     "cssnano": "^4.1.10",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-cache-bust": "^1.4.1",
-    "gulp-concat": "^2.6.1",
     "gulp-gzip": "^1.4.2",
     "gulp-imagemin": "^7.1.0",
     "gulp-notify": "^3.2.0",
@@ -38,6 +39,18 @@
     "gulp-uglify": "^3.0.2",
     "postcss-nth-child-fix": "^2.0.0",
     "postcss-pseudoelements": "^5.0.0",
-    "postcss-zindex": "^4.0.1"
-  }
+    "postcss-zindex": "^4.0.1",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
+  },
+  "browserify": {
+    "transform": [
+        [
+            "babelify",
+            {
+                "presets": ["@babel/env"]
+            }
+        ]
+    ]
+ }
 }
