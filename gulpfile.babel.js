@@ -3,7 +3,6 @@ import babelify from "babelify"
 import browserify from "browserify"
 import browserSync from "browser-sync"
 import cssnano from "cssnano"
-import babel from "gulp-babel"
 import cachebust from 'gulp-cache-bust'
 import gzip from "gulp-gzip"
 import imagemin from "gulp-imagemin"
@@ -45,9 +44,7 @@ const sassOptionsProd = {
 };
 
 const postCssPlugins = [
-    autoprefixer({
-        browsers: ['last 3 versions'],
-    }),
+    autoprefixer(),
     zIndex(),
     pseudoelements(),
     nthChild(),
@@ -81,7 +78,7 @@ gulp.task('serve', function() {
 // // css files on the page.
     gulp.watch('./src/scss/*/*.scss', gulp.series('stylesDev'));
 // Listen to change events on HTML and reload 
-    gulp.watch('src/pug/**/*.pug', gulp.series('pug')).on('change', reload);
+    gulp.watch('src/pug/**/*.pug', gulp.series('htmlDev')).on('change', reload);
 // Listen to change events on JS and reload
     gulp.watch('./src/js/*.js', gulp.series('scriptsDev')).on('change', reload);
 // Listen to change events on IMAGES and reload
@@ -98,7 +95,7 @@ gulp.task('stylesDev', ()=>{
         .pipe(plumber())
         .pipe(sass(sassOptionsDev)
         .on("error", sass.logError))                    
-        .pipe(sourcemaps.write('../maps'))              
+        .pipe(sourcemaps.write('.'))              
         .pipe(gulp.dest('./public/css'))
         .pipe(serve.stream({match: '**/*.css'}))        
 });
@@ -108,7 +105,7 @@ gulp.task('stylesProd', ()=>{
         .pipe(plumber())
         .pipe(sass(sassOptionsProd))                    
         .pipe(postcss(postCssPlugins))
-        .pipe(gulp.dest('./public/css'))
+        .pipe(gulp.dest('./dist/css'))
         .pipe(
             notify({
               message: "CSS complete",
@@ -120,13 +117,22 @@ gulp.task('stylesProd', ()=>{
 // HTML COMPILATION
 // *
 
-gulp.task('pug', ()=>{
+gulp.task('htmlDev', ()=>{
     return gulp.src('./src/pug/pages/*.pug')
         .pipe(plumber())
         .pipe(pug({
             basedir: './src/pug'
         }))
         .pipe(gulp.dest('./public/'))
+});
+
+gulp.task('htmlProd', ()=>{
+    return gulp.src('./src/pug/pages/*.pug')
+        .pipe(plumber())
+        .pipe(pug({
+            basedir: './src/pug'
+        }))
+        .pipe(gulp.dest('./dist/'))
 });
 
 /**
@@ -143,11 +149,10 @@ gulp.task('scriptsDev', ()=>{
             console.error(err)
             this.emit('end')
          })
-        .pipe(source('scripts-min.js'))
-        .pipe(buffer())           
-        .pipe(uglify())                             
+        .pipe(source('scripts.js'))
+        .pipe(buffer())                                      
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(sourcemaps.write('../maps'))
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./public/js/'))          
 });
 
@@ -162,8 +167,8 @@ gulp.task('scriptsProd', ()=>{
         .pipe(buffer())
         .pipe(uglify())
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(sourcemaps.write('../maps'))
-        .pipe(gulp.dest('./public/js/'))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('./dist/js/'))
         .pipe(
             notify({
               message: "JavaScript complete",
@@ -183,7 +188,7 @@ gulp.task('imagesDev', ()=>{
 gulp.task('imagesProd', ()=>{
     return gulp.src('./src/img/*')
         .pipe(imagemin())
-        .pipe(gulp.dest('./public/img'))
+        .pipe(gulp.dest('./dist/img'))
         .pipe(
             notify({
               message: "Images complete",
@@ -198,7 +203,7 @@ gulp.task('sitemap', ()=>{
         .pipe(sitemap({
             siteUrl: 'http://www.example.com'
         }))
-        .pipe(gulp.dest('./public'))
+        .pipe(gulp.dest('./dist'))
         .pipe(
             notify({
               message: "Sitemap complete",
@@ -211,11 +216,11 @@ gulp.task('cache', ()=>{
       .pipe(cachebust({
         type: 'timestamp'
       }))
-      .pipe(gulp.dest('./public'))
+      .pipe(gulp.dest('./dist'))
   });
 
   gulp.task('compress', () =>
-  gulp.src('./public/**/**')
+  gulp.src('./dist/**/**')
     .pipe(tar('code.tar'))   // Pack all the files together
     .pipe(gzip())            // Compress the package using gzip
     .pipe(gulp.dest('.'))
@@ -223,7 +228,7 @@ gulp.task('cache', ()=>{
 );
 
 gulp.task('size', () =>
-  gulp.src('public/**/**')     // Select all the files recursively in dist
+  gulp.src('dist/**/**')     // Select all the files recursively in dist
     .pipe(sizereport({
       gzip: true,         // Show the plain size and the compressed size
     }))
@@ -236,7 +241,7 @@ gulp.task('clean', ()=>{
 
 gulp.task("default", gulp.parallel("serve", gulp.series([
         "stylesDev",
-        "pug", 
+        "htmlDev", 
         "scriptsDev",
         "imagesDev",
       ])
@@ -244,11 +249,12 @@ gulp.task("default", gulp.parallel("serve", gulp.series([
 
 gulp.task("build", gulp.series(gulp.parallel([
         "stylesProd", 
-        "pug", 
+        "htmlProd", 
         "scriptsProd", 
         "imagesProd", 
         "cache", 
-        "sitemap"
+        "sitemap",
       ]), 
-        "compress"
+        "compress",
+        "size"
 ));
