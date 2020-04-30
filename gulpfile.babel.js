@@ -27,9 +27,6 @@ import nthChild from "postcss-nth-child-fix"
 import del from "del"
 
 const serve = browserSync.create()
-
-// const browserSync = require('browserSync').create();
-
 const reload = serve.reload
 
 const sassOptionsDev = {
@@ -113,9 +110,9 @@ gulp.task('stylesProd', ()=>{
           )
 });
 
-// **
-// HTML COMPILATION
-// *
+/**
+ * HTML COMPILATION
+ */
 
 gulp.task('htmlDev', ()=>{
     return gulp.src('./src/pug/pages/*.pug')
@@ -177,7 +174,7 @@ gulp.task('scriptsProd', ()=>{
 });
 
 /**
-* Copy Images to the public folder and minify
+* COPY IMAGES TO THE PUBLIC FOLDER ANS MINIFY
 */
 
 gulp.task('imagesDev', ()=>{
@@ -196,6 +193,10 @@ gulp.task('imagesProd', ()=>{
           );
 });
 
+/** 
+ * CREATE SITEMAP 
+ */
+
 gulp.task('sitemap', ()=>{
     return gulp.src('./public/**/*.html', {
             read: false
@@ -211,6 +212,10 @@ gulp.task('sitemap', ()=>{
           )
 });
 
+/**
+ * CACHE BUSTER
+ */
+
 gulp.task('cache', ()=>{
     return gulp.src('./public/**/*.html')
       .pipe(cachebust({
@@ -218,6 +223,10 @@ gulp.task('cache', ()=>{
       }))
       .pipe(gulp.dest('./dist'))
   });
+
+  /**
+   * COMPRESS FILES FOR PRODUCTION
+   */
 
   gulp.task('compress', () =>
   gulp.src('./dist/**/**')
@@ -227,6 +236,10 @@ gulp.task('cache', ()=>{
     .pipe(notify('Compressed package generated!'))
 );
 
+/**
+ * SIZE OF FILES
+ */
+
 gulp.task('size', () =>
   gulp.src('dist/**/**')     // Select all the files recursively in dist
     .pipe(sizereport({
@@ -234,7 +247,10 @@ gulp.task('size', () =>
     }))
 );
 
-// Task to delete target build folder
+/** 
+ * TASK TO DELETE TARGET BUILD FOLDER
+ */
+
 gulp.task('clean', ()=>{
     return del(['public/**', '!public']);
   });
