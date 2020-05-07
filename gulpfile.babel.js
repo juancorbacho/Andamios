@@ -255,7 +255,7 @@ gulp.task('clean', ()=>{
     return del(['public/**', '!public']);
   });
 
-gulp.task("default", gulp.parallel("serve", gulp.series([
+gulp.task("dev", gulp.parallel("serve", gulp.series([
         "stylesDev",
         "htmlDev", 
         "scriptsDev",
