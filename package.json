@@ -4,7 +4,7 @@
     "description": "Andamios simples para proyectos web estáticos",
     "main": "index.html",
     "scripts": {
-        "start": "gulp",
+        "start": "gulp dev",
         "build": "gulp build",
         "size": "gulp size",
         "clean": "gulp clean"
